@@ -538,7 +538,7 @@
     // Exports data to the outside world
     hyve.friends = friends
     hyve.search = search
-    hyve.geo = geo
+    hyve.nearby = nearby
     hyve.method = '' // set by the calling stream
     hyve.callback = '' // set by the calling stream
     hyve.stop = stop

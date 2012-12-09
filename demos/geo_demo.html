@@ -9,8 +9,7 @@
                  event.preventDefault()
                  hyve.stop();
                  hyve.replenish();
-                 query=$('#query').val();
-                 hyve.geo.stream( {latitude: '37.781157',longitude: '-122.398720', radius: '1mi'},function(data){
+                 hyve.nearby.stream( {latitude: '37.781157',longitude: '-122.398720', radius: '1mi'},function(data){
                      $('#output').prepend($(
                        '<p>'+
                        data.service +' : '+
@@ -22,10 +21,7 @@
         </script>
     </head>
     <body>
-        <form action="">
-            <input id="query" type="text" />
-            <button id="search" type="submit">search</button>
-        </form>
+         Streaming hyve.nearby.stream({latitude: '37.781157',longitude: '-122.398720', radius: '1mi'})
         <div id="output"></div>
     </body>
 </html>

@@ -2,7 +2,7 @@
     var hyve = (typeof require == 'function' && !(typeof define == 'function' && define.amd)) ? require('../src/hyve.core.js') : root.hyve
 
     hyve.feeds.twitter = {
-        methods : ['search', 'friends', 'popular', 'geo'],
+        methods : ['search', 'friends', 'popular', 'nearby'],
         interval : 2000,
         interval_friends : 60000,
         result_type : 'mixed', // mixed, recent, popular
@@ -19,10 +19,10 @@
             friends: 'https://api.twitter.com/1/statuses/home_timeline.json',
             popular: 'http://search.twitter.com/search.json?q={{query}}&lang=en&rpp=25&include_entities=True{{#&result_type=#result_type}}{{since}}{{#&callback=#callback}}',
             //Search url with empty query
-            geo: 'http://search.twitter.com/search.json?q=&geocode={{query}}&lang=en&include_entities=True{{#&result_type=#result_type}}{{since}}{{#&callback=#callback}}'
+            nearby: 'http://search.twitter.com/search.json?q=&geocode={{query}}&lang=en&include_entities=True{{#&result_type=#result_type}}{{since}}{{#&callback=#callback}}'
         },
         format_url : function(query){
-            // Format query if request if geo
+            // Format query if request is location based
             if(query['latitude']) {
                 // Default radius is 5km
                 radius = query['radius'] || '5km'
@@ -48,7 +48,7 @@
         },
         parsers : {
             search  : searchParser,
-            geo     : searchParser,
+            nearby     : searchParser,
             friends : function(data, query, callback) {
                 if (data) {
                     if (!this.items_seen) this.items_seen = {}

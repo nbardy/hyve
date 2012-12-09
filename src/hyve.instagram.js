@@ -2,21 +2,21 @@
     var hyve = (typeof require == 'function' && !(typeof define == 'function' && define.amd)) ? require('../src/hyve.core.js') : root.hyve
 
     hyve.feeds['instagram'] = {
-        methods : ['friends', 'search'],
+        methods : ['friends', 'search', 'nearby'],
         interval : 3000,
         interval_friends : 10000,
         access_token : '',
         feed_urls : {
             friends: 'https://api.instagram.com/v1/users/self/feed?limit=25&type=post{{ access_token }}{{ since }}{{#&callback=#callback}}',
             search: 'https://api.instagram.com/v1/tags/{{query}}/media/recent?limit=25&type=post{{ access_token }}{{ since }}{{#&callback=#callback}}'
-            geo: 'https://api.instagram.com/v1/media/search{{query}}&limit=25&type=post{{ access_token }}{{ since }}{{#&callback=#callback}}'
+            nearby: 'https://api.instagram.com/v1/media/search{{query}}&limit=25&type=post{{ access_token }}{{ since }}{{#&callback=#callback}}'
         },
         format_url : function(query){
             var since_arg = ''
             if (this.since){
                since_arg = '&min_id='+this.since
             }
-            // Geo requires a different query format
+            // Location requires a different query format
             if(query['latitude']) {
                 query = 
                     '?lat='+query['latitude']+
@@ -35,6 +35,7 @@
         parsers {
             search: parseData,
             friends: parseData
+            nearby: parseData
         }
     }
 
