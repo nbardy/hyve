@@ -24,8 +24,8 @@
         format_url : function(query){
             // Format query if request if geo
             if(query['latitude']) {
-                // Default radius is 25mi
-                radius = query['radius'] || '25mi'
+                // Default radius is 5km
+                radius = query['radius'] || '5km'
                 query = query['latitude']+','+query['longitude']+','+radius
             }
 
