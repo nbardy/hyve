@@ -1,9 +1,8 @@
 (function(root) {
-
     var hyve = (typeof require == 'function' && !(typeof define == 'function' && define.amd)) ? require('../src/hyve.core.js') : root.hyve
 
     hyve.feeds.twitter = {
-        methods : ['search', 'friends', 'popular'],
+        methods : ['search', 'friends', 'popular', 'geo'],
         interval : 2000,
         interval_friends : 60000,
         result_type : 'mixed', // mixed, recent, popular
@@ -18,9 +17,18 @@
         feed_urls : {
             search: 'http://search.twitter.com/search.json?q={{query}}&lang=en&include_entities=True{{#&result_type=#result_type}}{{since}}{{#&callback=#callback}}',
             friends: 'https://api.twitter.com/1/statuses/home_timeline.json',
-            popular: 'http://search.twitter.com/search.json?q={{query}}&lang=en&rpp=25&include_entities=True{{#&result_type=#result_type}}{{since}}{{#&callback=#callback}}'
+            popular: 'http://search.twitter.com/search.json?q={{query}}&lang=en&rpp=25&include_entities=True{{#&result_type=#result_type}}{{since}}{{#&callback=#callback}}',
+            //Search url with empty query
+            geo: 'http://search.twitter.com/search.json?q=&geocode={{query}}&lang=en&include_entities=True{{#&result_type=#result_type}}{{since}}{{#&callback=#callback}}'
         },
         format_url : function(query){
+            // Format query if request if geo
+            if(query['latitude']) {
+                // Default radius is 25mi
+                radius = query['radius'] || '25mi'
+                query = query['latitude']+','+query['longitude']+','+radius
+            }
+
             var since_arg
             if (this.since_ids[query]){
                 since_arg = '&since_id='+this.since_ids[query]
@@ -39,60 +47,8 @@
             }
         },
         parsers : {
-            search : function(data, query, callback){
-                if (data.refresh_url){
-                    hyve.feeds.twitter.since_ids[query] = data.refresh_url.replace(/\?since_id=([0-9]+).*/ig, "$1")
-                }
-                if (!this.items_seen){
-                    this.items_seen = {}
-                }
-                if (data.results){
-                    data.results.forEach(function(item){
-                        if (!this.items_seen[item.id_str.toString()]){
-                            this.items_seen[item.id_str.toString()] = true
-                            var links = []
-                            if (item.entities.urls) {
-                                item.entities.urls.forEach(function(url){
-                                    if(url.expanded_url){
-                                        links.push(url.expanded_url)
-                                    } else {
-                                        links.push("http://"+url.url)
-                                    }
-                                })
-                            }
-                            var weight = 1
-                            var likes = ''
-                            if (item.metadata.result_type == 'popular'){
-                                likes = item.metadata.recent_retweets
-                                weight = likes
-                            }
-
-                            hyve.process({
-                                'service' : 'twitter',
-                                'type' : 'text',
-                                'query' : query,
-                                'user' : {
-                                    'id' : item.from_user_id_str,
-                                    'real_name': item.from_user_name,
-                                    'name': item.from_user,
-                                    'avatar' : item.profile_image_url,
-                                    'profile' : "http://twitter.com/"+item.from_user
-                                },
-                                'likes' : likes,
-                                'id' : item.id_str,
-                                'date' : item.created_at,
-                                'text' : item.text,
-                                'links' : links,
-                                'source' : 'http://twitter.com/'+
-                                           item.from_user+
-                                           '/status/'+item.id_str,
-                                'weight' : weight
-                            },callback)
-                        }
-                    },this)
-                }
-            },
-
+            search  : searchParser,
+            geo     : searchParser,
             friends : function(data, query, callback) {
                 if (data) {
                     if (!this.items_seen) this.items_seen = {}
@@ -185,6 +141,60 @@
 
                 }
             }
+        }
+    }
+
+    function searchParser(data, query, callback){
+        if (data.refresh_url){
+            hyve.feeds.twitter.since_ids[query] = data.refresh_url.replace(/\?since_id=([0-9]+).*/ig, "$1")
+        }
+        if (!this.items_seen){
+            this.items_seen = {}
+        }
+        if (data.results){
+            data.results.forEach(function(item){
+                if (!this.items_seen[item.id_str.toString()]){
+                    this.items_seen[item.id_str.toString()] = true
+                    var links = []
+                    if (item.entities.urls) {
+                        item.entities.urls.forEach(function(url){
+                            if(url.expanded_url){
+                                links.push(url.expanded_url)
+                            } else {
+                                 links.push("http://"+url.url)
+                            }
+                        })
+                    }
+                    var weight = 1
+                    var likes = ''
+                    if (item.metadata.result_type == 'popular'){
+                        likes = item.metadata.recent_retweets
+                        weight = likes
+                    }
+
+                    hyve.process({
+                        'service' : 'twitter',
+                        'type' : 'text',
+                        'query' : query,
+                        'user' : {
+                            'id' : item.from_user_id_str,
+                            'real_name': item.from_user_name,
+                            'name': item.from_user,
+                            'avatar' : item.profile_image_url,
+                            'profile' : "http://twitter.com/"+item.from_user
+                        },
+                        'likes' : likes,
+                        'id' : item.id_str,
+                        'date' : item.created_at,
+                        'text' : item.text,
+                        'links' : links,
+                        'source' : 'http://twitter.com/'+
+                                   item.from_user+
+                                   '/status/'+item.id_str,
+                        'weight' : weight
+                    },callback)
+                }
+            },this)
         }
     }
 })(this)

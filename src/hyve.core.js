@@ -212,6 +212,14 @@
         }
     }
 
+    // Query should
+    var geo = {
+        stream: function(query, callback, custom_services) {
+            hyve.method = 'geo'
+            return stream(query, callback, custom_services);
+        }
+    };
+
     // Stops any running streams for given services
     function stop(custom_services) {
         var services
@@ -530,6 +538,7 @@
     // Exports data to the outside world
     hyve.friends = friends
     hyve.search = search
+    hyve.geo = geo
     hyve.method = '' // set by the calling stream
     hyve.callback = '' // set by the calling stream
     hyve.stop = stop
