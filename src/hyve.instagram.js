@@ -15,7 +15,7 @@
             var since_arg = ''
             if (this.since){
                since_arg = '&min_id='+this.since
-/           }
+            }
             // Geo requires a different query format
             if(query['latitude']) {
                 query = 
@@ -40,14 +40,12 @@
 
 function parseData(data, query, callback){
     if (data && data.data && data.data.length > 0){
-
-        // Solve instagram inconsistencies with pagination
-        // Use given pagination data if it is passed
-        if(data.pagination.next_min_id) {
-            since = data.pagination.next_mind_id
+        if(data.pagination && data.pagination.next_min_id) {
+            since = data.pagination.next_min_id
         } else {
             since = data.data[0].id
         }
+
         hyve.feeds.instagram.since = since
 
         data.data.forEach(function(item){
