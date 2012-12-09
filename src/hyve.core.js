@@ -213,9 +213,9 @@
     }
 
     // Query should
-    var geo = {
+    var nearby = {
         stream: function(query, callback, custom_services) {
-            hyve.method = 'geo'
+            hyve.method = 'nearby'
             return stream(query, callback, custom_services);
         }
     };

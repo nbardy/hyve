@@ -9,11 +9,22 @@
         feed_urls : {
             friends: 'https://api.instagram.com/v1/users/self/feed?limit=25&type=post{{ access_token }}{{ since }}{{#&callback=#callback}}',
             search: 'https://api.instagram.com/v1/tags/{{query}}/media/recent?limit=25&type=post{{ access_token }}{{ since }}{{#&callback=#callback}}'
+            geo: 'https://api.instagram.com/v1/media/search{{query}}&limit=25&type=post{{ access_token }}{{ since }}{{#&callback=#callback}}'
         },
         format_url : function(query){
             var since_arg = ''
             if (this.since){
-                since_arg = '&min_id='+this.since
+               since_arg = '&min_id='+this.since
+/           }
+            // Geo requires a different query format
+            if(query['latitude']) {
+                query = 
+                    '?lat='+query['latitude']+
+                    '&lng='+query['longitude']+
+                    '&distance='+query['radius']
+                
+                
+               
             }
             return {
                       query: query
@@ -21,7 +32,7 @@
                     , access_token: '&access_token=' + this.access_token
             }
         },
-        parsers : {
+        parsers {
             search: parseData,
             friends: parseData
         }
@@ -29,7 +40,15 @@
 
 function parseData(data, query, callback){
     if (data && data.data && data.data.length > 0){
-        hyve.feeds.instagram.since = data.pagination.next_min_id
+
+        // Solve instagram inconsistencies with pagination
+        // Use given pagination data if it is passed
+        if(data.pagination.next_min_id) {
+            since = data.pagination.next_mind_id
+        } else {
+            since = data.data[0].id
+        }
+        hyve.feeds.instagram.since = since
 
         data.data.forEach(function(item){
 
