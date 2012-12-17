@@ -1,5 +1,4 @@
 (function(root) {
-
     var hyve = (typeof require == 'function' && !(typeof define == 'function' && define.amd)) ? require('../src/hyve.core.js') : root.hyve
 
     hyve.feeds['facebook'] = {

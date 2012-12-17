@@ -4,24 +4,33 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
         <script src="../src/hyve.core.js" type="text/javascript"></script>
         <script src="../src/hyve.twitter.js" type="text/javascript"></script>
+        <script src="../src/hyve.instagram.js" type="text/javascript"></script>
         <script type="text/javascript">
             $(document).ready(function() {
-                 event.preventDefault()
-                 hyve.stop();
-                 hyve.replenish();
-                 hyve.nearby.stream( {latitude: '37.781157',longitude: '-122.398720', radius: '1mi'},function(data){
-                     $('#output').prepend($(
-                       '<p>'+
-                       data.service +' : '+
-                       data.text  +
-                       '</p>'
-                     ));
-                 },['twitter']);
+                $('form').submit(function(event){
+                    event.preventDefault()
+                    hyve.stop();
+                    hyve.replenish();
+                    token=$('#query').val();
+                    hyve.feeds.instagram.access_token = token;
+                    hyve.nearby.stream( { latitude: '37.781157',longitude: '-122.398720', radius: '1mi'},function(data){
+                        $('#output').prepend($(
+                          '<p>'+
+                          data.service +' : '+
+                          data.text  +
+                          '</p>'
+                        ));
+                    },['twitter','instagram']);
+                });
             });
         </script>
     </head>
     <body>
-         Streaming hyve.nearby.stream({latitude: '37.781157',longitude: '-122.398720', radius: '1mi'})
+         Enter Your instagram access_token and it will stream from { latitude: '37.781157',longitude: '-122.398720', radius: '1mi'}
+        <form action="">
+            <input id="query" type="text" />
+            <button id="search" type="submit">search</button>
+        </form>
         <div id="output"></div>
     </body>
 </html>
